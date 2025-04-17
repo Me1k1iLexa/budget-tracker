@@ -1,0 +1,122 @@
+.footer {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  background-color: #dad7d7;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  gap: 40px;
+}
+.footer-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  max-width: 50%;
+  gap: 30px;
+  justify-content: start;
+}
+.footer-paragraph {
+  font-family: Involve-Medium, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+}
+.main-style-button {
+  background-color: var(--ButtonColorMain);
+  color: var(--TextColorWhite);
+  border: none;
+  height: 100%;
+  border-radius: 10px;
+  font-size: 16px;
+  line-height: 21px;
+  text-align: center;
+
+  cursor: pointer;
+}
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footer-contact-text {
+  display: flex;
+  gap: 5px;
+  justify-content: start;
+  align-items: center;
+}
+.footer-contact-text a {
+  font-family: Involve-Medium, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  color: var(--TextColorBlack);
+  text-decoration: none;
+
+}
+.footer-contact a:visited {
+  color: var(--TextColorBlack);
+}
+.line {
+  max-width: 1200px;
+  width: 100%;
+  height: 2px;
+  background-color: var(--TextColorBlack);
+  margin: 5px auto 5px auto;
+}
+.footer-license {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 50px;
+}
+.footer-license-text {
+  font-family: Involve-Medium, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  align-self: start;
+}
+.footer-license-link {
+  display: flex;
+  gap: 23px;
+  align-self: end;
+}
+.footer-license-link-text a {
+  font-family: Involve-Medium, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  color: var(--TextColorBlack);
+  text-decoration: none;
+}
+.footer-license-link-text a:visited {
+  color: var(--TextColorBlack);
+}
+.footer-submit {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.footer-input {
+  border: none;
+  border-radius: 10px;
+  background-color: var(--ButtonColorMain);
+  color: var(--TextColorWhite);
+  padding: 10px;
+  width: 360px;
+  height: 40px;
+  font-size: 16px;
+  line-height: 21px;
+  text-align: center;
+}
+.footer-input::placeholder {
+  color: var(--TextColorWhite);
+}

@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  created_at    DateTime @default(now())
+  name          String
+
+  transactions  Transaction[]
+  budgets       Budget[]
+  analytics     Analytics[]
+  notifications Notification[]
+  syncData      SyncData[]
+}
+
+model Transaction {
+  id       Int      @id @default(autoincrement())
+  amount   Float
+  category String
+  note     String?
+  date     DateTime
+  userId   Int
+  user     User     @relation(fields: [userId], references: [id])
+}
+
+model Budget {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  period       String
+  limit_amount Float
+  start_date   DateTime
+  end_date     DateTime
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Analytics {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  date          DateTime
+  total_income  Float
+  total_expense Float
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  type         String
+  message      String
+  trigger_date DateTime
+  is_read      Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SyncData {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  operation_type String
+  file_path      String
+  created_at     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
