@@ -1,0 +1,30 @@
+.form {
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.submit {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: var(--ButtonColorMain);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+

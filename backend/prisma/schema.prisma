@@ -19,6 +19,7 @@ model User {
   analytics     Analytics[]
   notifications Notification[]
   syncData      SyncData[]
+  Income        Income[]
 }
 
 model Transaction {
@@ -34,12 +35,11 @@ model Transaction {
 model Budget {
   id           Int      @id @default(autoincrement())
   userId       Int
-  period       String
   limit_amount Float
-  start_date   DateTime
-  end_date     DateTime
+  createdAt    DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user   User     @relation(fields: [userId], references: [id])
+  income Income[]
 }
 
 model Analytics {
@@ -61,6 +61,17 @@ model Notification {
   is_read      Boolean  @default(false)
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Income {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  budget    Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  budgetId  Int
+  source    String
+  amount    Float
+  createdAt DateTime @default(now())
 }
 
 model SyncData {

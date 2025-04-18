@@ -7,8 +7,7 @@ const Profile = () => {
   const navigate = useNavigate()
   const userId = localStorage.getItem('userId')
   const [user, setUser] = useState(null)
-  const [monthlySpent, setMonthlySpent] = useState(0)
-  const [activeBudget, setActiveBudget] = useState(null)
+  const [budgets, setBudgets] = useState([])
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -16,24 +15,13 @@ const Profile = () => {
       setUser(res.data)
     }
 
-    const fetchTransactions = async () => {
-      const res = await API.get(`/transactions?userId=${userId}`)
-      const thisMonth = new Date().getMonth()
-      const total = res.data
-          .filter(t => new Date(t.date).getMonth() === thisMonth)
-          .reduce((acc, curr) => acc + curr.amount, 0)
-      setMonthlySpent(total)
-    }
-
-    const fetchBudget = async () => {
+    const fetchBudgets = async () => {
       const res = await API.get(`/budgets?userId=${userId}`)
-      const active = res.data[0] // допустим, пока первый — активный
-      setActiveBudget(active)
+      setBudgets(res.data)
     }
 
     fetchUser()
-    fetchTransactions()
-    fetchBudget()
+    fetchBudgets()
   }, [userId])
 
   const handleLogout = () => {
@@ -45,24 +33,38 @@ const Profile = () => {
 
   return (
       <div className={styles.wrapper}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>Профиль</h1>
-          <button className="btn" onClick={handleLogout}>Выйти</button>
-        </div>
+        <div className={styles.container}>
 
-        <div className={styles.infoBlock}>
-          <p><strong>Имя:</strong> {user.name}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Телефон:</strong> {user.phone || '—'}</p>
-          <p><strong>Дата регистрации:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
-          <hr />
-          <p><strong>Активный бюджет:</strong> {activeBudget ? `${activeBudget.limit_amount}₽` : '—'}</p>
-          <p><strong>Потрачено в этом месяце:</strong> {monthlySpent}₽</p>
-        </div>
+          <div className={styles.userInfo}>
+            <div className={styles.avatar}>{user.name[0]}</div>
+            <h2 className={styles.userName}>{user.name}</h2>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Телефон:</strong> {user.phone || '—'}</p>
+            <p><strong>Регистрация:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
+            <div className={styles.userButtons}>
+              <button className={styles.logout} onClick={handleLogout}>Выйти</button>
+              <button className={styles.edit}>Редактировать</button>
+            </div>
+          </div>
 
-        <p className={styles.note}>Редактирование профиля пока недоступно</p>
+
+          <div className={styles.budgetSection}>
+            <h3>Ваши бюджеты</h3>
+            <div className={styles.budgetGrid}>
+              {budgets.length > 0 ? budgets.map(b => (
+                  <div key={b.id} className={styles.budgetCard}>
+                    <p><strong>Период:</strong> {b.period}</p>
+                    <p><strong>Лимит:</strong> {b.limit_amount}₽</p>
+                    <p><strong>С:</strong> {new Date(b.start_date).toLocaleDateString()}</p>
+                    <p><strong>По:</strong> {new Date(b.end_date).toLocaleDateString()}</p>
+                  </div>
+              )) : <p>Бюджеты не найдены</p>}
+            </div>
+          </div>
+        </div>
       </div>
   )
 }
 
-export default Profile;
+export default Profile
+
