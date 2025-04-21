@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
-import API from '../api/api'
+import API from '../api/api.js'
 import styles from './BudgetPanel.module.css'
-import IncomeForm from './IncomeForm'
-import BudgetForm from './BudgetForm'
+import IncomeForm from '../components/IncomeForm.jsx'
+import BudgetForm from '../components/BudgetForm.jsx'
 
 const BudgetPanel = () => {
     const userId = localStorage.getItem('userId')
     const [budget, setBudget] = useState(null)
     const [incomes, setIncomes] = useState([])
     const [loading, setLoading] = useState(true)
-
+    const getPeriodId = () => {
+        const date = new Date();
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    }
     const fetchBudget = async () => {
         const res = await API.get(`/budget?userId=${userId}`)
         setBudget(res.data[0] || null)
@@ -17,8 +20,9 @@ const BudgetPanel = () => {
     }
 
     const fetchIncomes = async () => {
-        const res = await API.get(`/income`, { params: { userId } })
-        setIncomes(res.data)
+        const periodId = getPeriodId();
+        const res = await API.get(`/income`, { params: { userId, periodId } });
+        setIncomes(res.data);
     }
 
     useEffect(() => {

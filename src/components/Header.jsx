@@ -10,7 +10,7 @@ const Header = () => {
             <Link to="/" className="logo">PLAN B</Link>
             <nav className="nav">
                 <Link to="/budget">БЮДЖЕТ</Link>
-                <a href="#">ТРАНЗАКЦИИ</a>
+                <Link to="/history">ИСТОРИЯ</Link>
                 <a href="#">УВЕДОМЛЕНИЯ</a>
                 <a href="#">АНАЛИЗ СЧЕТА</a>
             </nav>

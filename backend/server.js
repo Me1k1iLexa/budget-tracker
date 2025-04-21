@@ -91,18 +91,41 @@ app.get("/transactions", async (req, res) => {
 });
 
 app.post("/transactions", async (req, res) => {
-  const { userId, amount, category, note, date } = req.body;
+  const { userId, amount, category, note, date, type, periodId } = req.body;
+
+  if (!type || !periodId) {
+    return res.status(400).json({ message: 'Поля type и periodId обязательны!' });
+  }
+
   await prisma.transaction.create({
     data: {
-      userId,
-      amount,
+      userId: Number(userId),
+      amount: Number(amount),
       category,
       note,
       date: new Date(date),
+      type,
+      periodId
     },
   });
+
   res.json({ success: true });
 });
+app.delete('/transactions/:id', async (req, res) => {
+  const id = parseInt(req.params.id)
+
+  if (isNaN(id)) {
+    return res.status(400).json({ message: 'Неверный ID транзакции' })
+  }
+
+  try {
+    await prisma.transaction.delete({ where: { id } })
+    res.status(200).json({ success: true, message: 'Транзакция удалена' })
+  } catch (err) {
+    console.error('Ошибка при удалении транзакции:', err)
+    res.status(500).json({ message: 'Ошибка при удалении транзакции' })
+  }
+})
 
 
 app.post("/budget", async (req, res) => {
@@ -137,7 +160,7 @@ app.get("/budget", async (req, res) => {
   }
 })
 app.post('/income', async (req, res) => {
-  const { userId, budgetId, source, amount } = req.body
+  const { userId, budgetId, source, amount, periodId } = req.body;
 
   try {
     const income = await prisma.income.create({
@@ -145,10 +168,10 @@ app.post('/income', async (req, res) => {
         userId: Number(userId),
         budgetId: Number(budgetId),
         source,
-        amount: Number(amount)
+        amount: Number(amount),
+        periodId,
       }
-    })
-
+    });
 
     await prisma.budget.update({
       where: { id: budgetId },
@@ -157,29 +180,31 @@ app.post('/income', async (req, res) => {
           increment: Number(amount)
         }
       }
-    })
+    });
 
-    res.status(201).json(income)
+    res.status(201).json(income);
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: 'Ошибка при добавлении дохода' })
+    console.error(err);
+    res.status(500).json({ message: 'Ошибка при добавлении дохода' });
   }
-})
+});
+
 
 app.get('/income', async (req, res) => {
-  const userId = parseInt(req.query.userId)
-  if (!userId) return res.status(400).json({ message: 'userId обязателен' })
+  const { userId, periodId } = req.query;
+  if (!userId || !periodId) return res.status(400).json({ message: 'userId и periodId обязательны' });
 
   try {
     const incomes = await prisma.income.findMany({
-      where: { userId }
-    })
-    res.json(incomes)
+      where: { userId: Number(userId), periodId }
+    });
+    res.json(incomes);
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: 'Ошибка при получении доходов' })
+    console.error(err);
+    res.status(500).json({ message: 'Ошибка при получении доходов' });
   }
-})
+});
+
 app.delete("/budget/reset", async (req, res) => {
   const userId = parseInt(req.query.userId)
   if (isNaN(userId)) {
@@ -264,19 +289,11 @@ app.get("/sync", async (req, res) => {
   res.json(list);
 });
 
-app.post("/sync", async (req, res) => {
-  const { userId, operation_type, file_path } = req.body;
-
-  await prisma.syncData.create({
-    data: {
-      userId,
-      operation_type,
-      file_path,
-    },
-  });
-
-  res.json({ success: true });
-});
+app.get("/transactions", async (req, res) => {
+  const userId = parseInt(req.query.userId);
+  const list = await prisma.transaction.findMany({ where: { userId } });
+  res.json(list);
+})
 
 app.get("/", (req, res) => {
   res.send("Привет! Сервер работает.");

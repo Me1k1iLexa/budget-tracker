@@ -4,7 +4,8 @@ import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import Profile from './pages/Profile'
-import BudgetPanel from "./components/BudgetPanel.jsx";
+import BudgetPanel from "./pages/BudgetPanel.jsx";
+import History from "./pages/History.jsx";
 
 const router = createBrowserRouter([
     {
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
             { path: 'register', element: <RegisterPage /> },
             { path: 'profile', element: <Profile /> },
             { path: 'budget', element: <BudgetPanel /> },
+            { path: 'history', element: <History/>}
         ]
     }
 ])

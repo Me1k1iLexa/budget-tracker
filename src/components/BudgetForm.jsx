@@ -14,31 +14,35 @@ const BudgetForm = ({ userId, onBudgetCreated }) => {
     const addField = () => {
         setIncomes([...incomes, { source: '', amount: '' }])
     }
-
+    const getPeriodId = () => {
+        const date = new Date();
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    }
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
+        const valid = incomes.filter(i => i.source && i.amount);
+        if (valid.length === 0) return;
 
-        const valid = incomes.filter(i => i.source && i.amount)
-        if (valid.length === 0) return
+        const periodId = getPeriodId();
 
         const budgetRes = await API.post('/budget', {
             userId,
             limitAmount: 0
-        })
+        });
 
-        const budget = budgetRes.data
-
+        const budget = budgetRes.data;
 
         for (const income of valid) {
             await API.post('/income', {
                 userId,
                 budgetId: budget.id,
                 source: income.source,
-                amount: parseFloat(income.amount)
-            })
+                amount: parseFloat(income.amount),
+                periodId
+            });
         }
 
-        onBudgetCreated()
+        onBudgetCreated();
     }
 
     return (
@@ -62,11 +66,11 @@ const BudgetForm = ({ userId, onBudgetCreated }) => {
                 </div>
             ))}
 
-            <button type="button" onClick={addField}>
+            <button type="button" className="main-style-button" onClick={addField}>
                 Добавить источник
             </button>
 
-            <button type="submit" className={styles.submit}>
+            <button type="submit" className={`main-style-button ${styles.submit}`}>
                 Создать бюджет
             </button>
         </form>

@@ -1,6 +1,5 @@
 .form {
     background: #f9f9f9;
-    padding: 30px;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
@@ -19,12 +18,6 @@ input {
 }
 
 .submit {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background: var(--ButtonColorMain);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+    margin-left: 10px;
 }
 
