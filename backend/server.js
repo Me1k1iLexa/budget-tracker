@@ -233,67 +233,31 @@ app.delete('/income/:id', async (req, res) => {
     res.status(500).json({ message: 'Ошибка при удалении дохода' })
   }
 })
+app.get('/analitics/average-daily-spend', async (req, res) => {
+    const {userId, periodId} = req.query;
+    if (!userId || !periodId){
+      return res.status(400).json({message: 'userId and periodId is important'})
+    }
 
-app.get("/analytics", async (req, res) => {
-  const userId = parseInt(req.query.userId);
-  const list = await prisma.analytics.findMany({ where: { userId } });
-  res.json(list);
-});
-
-app.post("/analytics", async (req, res) => {
-  const { userId, date, total_income, total_expense } = req.body;
-
-  await prisma.analytics.create({
-    data: {
-      userId,
-      date: new Date(date),
-      total_income,
-      total_expense,
-    },
-  });
-
-  res.json({ success: true });
-});
-app.get("/notifications", async (req, res) => {
-  const userId = parseInt(req.query.userId);
-  const list = await prisma.notification.findMany({ where: { userId } });
-  res.json(list);
-});
-
-app.post("/notifications", async (req, res) => {
-  const { userId, type, message, trigger_date } = req.body;
-
-  await prisma.notification.create({
-    data: {
-      userId,
-      type,
-      message,
-      trigger_date: new Date(trigger_date),
-    },
-  });
-
-  res.json({ success: true });
-});
-
-app.post("/notifications/read", async (req, res) => {
-  const { id } = req.body;
-  await prisma.notification.update({
-    where: { id },
-    data: { is_read: true },
-  });
-  res.json({ success: true });
-});
-app.get("/sync", async (req, res) => {
-  const userId = parseInt(req.query.userId);
-  const list = await prisma.syncData.findMany({ where: { userId } });
-  res.json(list);
-});
-
-app.get("/transactions", async (req, res) => {
-  const userId = parseInt(req.query.userId);
-  const list = await prisma.transaction.findMany({ where: { userId } });
-  res.json(list);
+    try{
+      const expenses = await prisma.transaction.findMany({
+        where: {
+          id: Number(userId),
+          periodId,
+          type:"EXPENSE"
+        },
+      })
+      const sum = expenses.reduce((acc, cur) => sum + cur.amount, 0)
+      const day = new Date().getDate()
+      const average = sum/day;
+      res.json({average})
+    }
+    catch(err){
+      console.error(err);
+      res.status(500).json({message:'Mistake to calculate average daily spend'})
+    }
 })
+
 
 app.get("/", (req, res) => {
   res.send("Привет! Сервер работает.");
