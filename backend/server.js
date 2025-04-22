@@ -257,7 +257,32 @@ app.get('/analitics/average-daily-spend', async (req, res) => {
       res.status(500).json({message:'Mistake to calculate average daily spend'})
     }
 })
+app.get('/analitics/allPeriodId', async (req, res) => {
+  const {userId} = req.query;
 
+  if (!userId){
+    return res.status(400).json({message:'userId is important'})
+  }
+
+  try{
+    const periods = await prisma.transaction.findMany({
+      where: {
+        userId: Number(userId)
+      },
+      distinct:['periodId'],
+      select: {
+        periodId: true
+      }
+    })
+
+    const uniquePeriods = periods.map(p => p.periodId)
+    res.json(uniquePeriods)
+  }
+  catch(err){
+    console.error(err);
+    res.status(500).json({message:'Mistake to get allPeriodId'})
+  }
+})
 
 app.get("/", (req, res) => {
   res.send("Привет! Сервер работает.");
