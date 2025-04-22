@@ -20,7 +20,7 @@ const Diagrams = ({ transactions }) => {
         const canvas = chartRef.current
         const ctx = canvas.getContext('2d')
 
-        // Хак: увеличиваем DPI
+
         const pixelRatio = window.devicePixelRatio || 1
         canvas.width = canvas.offsetWidth * pixelRatio
         canvas.height = canvas.offsetHeight * pixelRatio

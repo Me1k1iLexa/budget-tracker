@@ -1,63 +1,94 @@
-const { PrismaClient } = require('@prisma/client')
-const prisma = new PrismaClient()
-const dayjs = require('dayjs')
+//seed сделан нейросетью O_o
+
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const dayjs = require('dayjs');
+
+const MONTHS = [
+    '2024-05', '2024-06', '2024-07', '2024-08',
+    '2024-09', '2024-10', '2024-11', '2024-12',
+    '2025-01', '2025-02', '2025-03', '2025-04'
+];
+
+const CATEGORIES = ['Продукты', 'Одежда', 'Транспорт', 'Кафе', 'Развлечения'];
+const SOURCES = ['Зарплата', 'Фриланс', 'Подарок', 'Бонус'];
+
+const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 async function main() {
-    const now = new Date()
-    const periodId = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
+    for (let i = 1; i <= 5; i++) {
+        const user = await prisma.user.create({
+            data: {
+                email: `user${i}@test.com`,
+                password_hash: '123',
+                name: `User ${i}`,
+                created_at: new Date()
+            }
+        });
 
-    const user = await prisma.user.create({
-        data: {
-            email: 'test@planb.ru',
-            password_hash: 'hashed123',
-            name: 'Test User',
-            created_at: now
-        }
-    })
-
-    const budget = await prisma.budget.create({
-        data: {
-            userId: user.id,
-            limit_amount: 100000,
-            createdAt: now
-        }
-    })
-
-    const sources = ['Зарплата', 'Фриланс', 'Подарок']
-    for (const src of sources) {
-        await prisma.income.create({
+        const budget = await prisma.budget.create({
             data: {
                 userId: user.id,
-                budgetId: budget.id,
-                source: src,
-                amount: Math.floor(Math.random() * 30000 + 10000),
-                periodId,
-                createdAt: now
+                limit_amount: getRandom(50000, 150000),
+                createdAt: new Date()
             }
-        })
+        });
+
+        for (const periodId of MONTHS) {
+            const monthlyIncome = [];
+            let incomeSum = 0;
+
+            // создаём 2-3 источника дохода
+            const incomeCount = getRandom(2, 3);
+            for (let j = 0; j < incomeCount; j++) {
+                const amount = getRandom(15000, 40000);
+                incomeSum += amount;
+
+                await prisma.income.create({
+                    data: {
+                        userId: user.id,
+                        budgetId: budget.id,
+                        source: SOURCES[j % SOURCES.length],
+                        amount,
+                        createdAt: new Date(),
+                        periodId
+                    }
+                });
+            }
+
+            let totalSpent = 0;
+            let k = 0;
+            // создаём траты, пока они не превысят доход
+            while (totalSpent < incomeSum * 0.9 && k < 20) {
+                const amount = getRandom(1000, 7000);
+                if (totalSpent + amount > incomeSum) break;
+
+                await prisma.transaction.create({
+                    data: {
+                        userId: user.id,
+                        amount,
+                        category: CATEGORIES[getRandom(0, CATEGORIES.length - 1)],
+                        note: 'Авто сида',
+                        date: dayjs(`${periodId}-10`).add(getRandom(0, 20), 'day').toDate(),
+                        type: 'EXPENSE',
+                        periodId
+                    }
+                });
+
+                totalSpent += amount;
+                k++;
+            }
+        }
     }
 
-    const categories = ['Продукты', 'Транспорт', 'Кафе', 'Одежда', 'Спорт', 'Хобби']
-    for (let i = 0; i < 30; i++) {
-        await prisma.transaction.create({
-            data: {
-                userId: user.id,
-                amount: Math.floor(Math.random() * 5000 + 500),
-                category: categories[Math.floor(Math.random() * categories.length)],
-                note: ['Купил кофе', 'Бензин', 'Тренировка', 'Случайно'][Math.floor(Math.random() * 4)],
-                date: dayjs(now).subtract(Math.floor(Math.random() * 30), 'day').toDate(),
-                type: Math.random() < 0.8 ? 'EXPENSE' : 'INCOME',
-                periodId
-            }
-        })
-    }
-
-    console.log('✅ База успешно заполнена')
+    console.log(' База готова');
 }
 
 main()
     .then(() => process.exit(0))
-    .catch(e => {
-        console.error(e)
-        process.exit(1)
-    })
+    .catch((e) => {
+        console.error(e);
+        process.exit(1);
+    });
+
+

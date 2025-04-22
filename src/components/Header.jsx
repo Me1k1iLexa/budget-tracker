@@ -11,8 +11,7 @@ const Header = () => {
             <nav className="nav">
                 <Link to="/budget">БЮДЖЕТ</Link>
                 <Link to="/history">ИСТОРИЯ</Link>
-                <a href="#">УВЕДОМЛЕНИЯ</a>
-                <a href="#">АНАЛИЗ СЧЕТА</a>
+                <Link to="/analitics">АНАЛИЗ СЧЕТА</Link>
             </nav>
             <div className="auth-buttons">
                 {isAuth ? (

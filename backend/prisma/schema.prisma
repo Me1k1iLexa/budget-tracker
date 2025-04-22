@@ -4,70 +4,29 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 model User {
   id            Int      @id @default(autoincrement())
   email         String   @unique
   password_hash String
-  created_at    DateTime @default(now())
   name          String
+  created_at    DateTime @default(now())
 
-  transactions  Transaction[]
-  budgets       Budget[]
-  analytics     Analytics[]
-  notifications Notification[]
-  syncData      SyncData[]
-  incomes       Income[]
-}
-
-enum TransactionType {
-  INCOME
-  EXPENSE
-}
-
-model Transaction {
-  id       Int             @id @default(autoincrement())
-  amount   Float
-  category String
-  note     String?
-  date     DateTime
-  periodId String          @default("2025-04")
-  type     TransactionType
-  userId   Int
-  user     User            @relation(fields: [userId], references: [id])
+  budgets      Budget[]
+  incomes      Income[]
+  transactions Transaction[]
 }
 
 model Budget {
   id           Int      @id @default(autoincrement())
   userId       Int
-  limit_amount Float
+  limit_amount Int
   createdAt    DateTime @default(now())
 
   user    User     @relation(fields: [userId], references: [id])
   incomes Income[]
-}
-
-model Analytics {
-  id            Int      @id @default(autoincrement())
-  userId        Int
-  date          DateTime
-  total_income  Float
-  total_expense Float
-
-  user User @relation(fields: [userId], references: [id])
-}
-
-model Notification {
-  id           Int      @id @default(autoincrement())
-  userId       Int
-  type         String
-  message      String
-  trigger_date DateTime
-  is_read      Boolean  @default(false)
-
-  user User @relation(fields: [userId], references: [id])
 }
 
 model Income {
@@ -75,20 +34,28 @@ model Income {
   userId    Int
   budgetId  Int
   source    String
-  amount    Float
-  periodId  String   @default("2025-04")
+  amount    Int
   createdAt DateTime @default(now())
+  periodId  String
 
   user   User   @relation(fields: [userId], references: [id])
-  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  budget Budget @relation(fields: [budgetId], references: [id])
 }
 
-model SyncData {
-  id             Int      @id @default(autoincrement())
-  userId         Int
-  operation_type String
-  file_path      String
-  created_at     DateTime @default(now())
+model Transaction {
+  id       Int             @id @default(autoincrement())
+  userId   Int
+  amount   Int
+  category String
+  note     String?
+  date     DateTime
+  type     TransactionType
+  periodId String
 
   user User @relation(fields: [userId], references: [id])
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
 }

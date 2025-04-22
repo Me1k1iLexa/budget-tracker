@@ -242,12 +242,12 @@ app.get('/analitics/average-daily-spend', async (req, res) => {
     try{
       const expenses = await prisma.transaction.findMany({
         where: {
-          id: Number(userId),
+          userId: Number(userId),
           periodId,
           type:"EXPENSE"
         },
       })
-      const sum = expenses.reduce((acc, cur) => sum + cur.amount, 0)
+      const sum = expenses.reduce((acc, cur) => acc + cur.amount, 0)
       const day = new Date().getDate()
       const average = sum/day;
       res.json({average})
@@ -257,7 +257,7 @@ app.get('/analitics/average-daily-spend', async (req, res) => {
       res.status(500).json({message:'Mistake to calculate average daily spend'})
     }
 })
-app.get('/analitics/allPeriodId', async (req, res) => {
+app.get('/analitics/allPeriodsId', async (req, res) => {
   const {userId} = req.query;
 
   if (!userId){
@@ -283,6 +283,81 @@ app.get('/analitics/allPeriodId', async (req, res) => {
     res.status(500).json({message:'Mistake to get allPeriodId'})
   }
 })
+app.get('/analitics/monthly-comparison', async (req, res) => {
+  const { userId, periodId } = req.query;
+  if (!userId || !periodId) {
+    return res.status(400).json({ message: 'userId и periodId обязательны' });
+  }
+
+  const [year, month] = periodId.split('-');
+  const prevMonth = String(Number(month) - 1).padStart(2, '0');
+  const prevPeriodId = `${year}-${prevMonth}`;
+
+  try {
+    const [currentExpenses, previousExpenses] = await Promise.all([
+      prisma.transaction.findMany({
+        where: {
+          userId: Number(userId),
+          periodId,
+          type: 'EXPENSE'
+        }
+      }),
+      prisma.transaction.findMany({
+        where: {
+          userId: Number(userId),
+          periodId: prevPeriodId,
+          type: 'EXPENSE'
+        }
+      })
+    ]);
+
+    const sum = txs => txs.reduce((acc, tx) => acc + tx.amount, 0);
+
+    const currentTotal = sum(currentExpenses);
+    const previousTotal = sum(previousExpenses);
+
+    const diff = previousTotal === 0
+        ? null
+        : (((currentTotal - previousTotal) / previousTotal) * 100).toFixed(2);
+
+    res.json({ currentTotal, previousTotal, diff });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Ошибка при сравнении месяцев' });
+  }
+});
+app.get('/analitics/average-monthly-expense', async (req, res) => {
+  const { userId } = req.query;
+  if (!userId) return res.status(400).json({ message: 'userId обязателен' });
+
+  try {
+    const expenses = await prisma.transaction.findMany({
+      where: {
+        userId: Number(userId),
+        type: 'EXPENSE'
+      },
+      select: {
+        amount: true,
+        periodId: true
+      }
+    });
+
+    const grouped = expenses.reduce((acc, tx) => {
+      if (!acc[tx.periodId]) acc[tx.periodId] = 0;
+      acc[tx.periodId] += tx.amount;
+      return acc;
+    }, {});
+
+    const months = Object.keys(grouped).length;
+    const total = Object.values(grouped).reduce((acc, val) => acc + val, 0);
+    const average = months === 0 ? 0 : (total / months).toFixed(2);
+
+    res.json({ average });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Ошибка при расчёте средней траты' });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Привет! Сервер работает.");
