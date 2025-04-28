@@ -358,6 +358,21 @@ app.get('/analitics/average-monthly-expense', async (req, res) => {
     res.status(500).json({ message: 'Ошибка при расчёте средней траты' });
   }
 });
+app.put('/users/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, email, phone } = req.body;
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { name, email, phone },
+    });
+    res.json(updatedUser);
+  } catch (err) {
+    console.error('Ошибка при обновлении пользователя', err);
+    res.status(500).json({ message: 'Ошибка при обновлении пользователя' });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Привет! Сервер работает.");

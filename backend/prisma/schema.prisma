@@ -8,15 +8,15 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  password_hash String
+  id            Int           @id @default(autoincrement())
+  email         String        @unique
   name          String
-  created_at    DateTime @default(now())
-
-  budgets      Budget[]
-  incomes      Income[]
-  transactions Transaction[]
+  password_hash String
+  phone         String?
+  created_at    DateTime      @default(now())
+  budgets       Budget[]
+  incomes       Income[]
+  transactions  Transaction[]
 }
 
 model Budget {
